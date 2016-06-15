@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request');
-
 // vehicle info endpoint
 router.get('/:id', function(req, res, next) {
 	var input = { id: req.params.id,  responseType: 'JSON' };
