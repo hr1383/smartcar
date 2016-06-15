@@ -28,7 +28,7 @@ app.use(function(error, req, res, next) {
 	} else {
 		res.status(500).send({"status" : "500", "reason": "Internal server error"});
 	}
-  });
+});
 
 // START THE SERVER
 // =============================================================================

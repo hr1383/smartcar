@@ -17,7 +17,7 @@ describe('Smartcar API test', function() {
       res.body.doorCount.should.be.equal(4);
       res.body.driveTrain.should.be.equal("v8");
       done();
-      });
+    });
   });
 
   it('should not return vehicle info', function(done) {      
@@ -27,7 +27,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(404); 
       res.body.reason.should.be.equal("Vehicle id: 123334 not found.");        
       done();
-      });
+    });
   });
 
   it('passing bad url', function(done) {      
@@ -36,7 +36,7 @@ describe('Smartcar API test', function() {
     .end(function(err, res) {
       res.status.should.be.equal(404); 
       done();
-      });
+    });
   });
 
   it('should return vehicle doors status', function(done) {      
@@ -46,7 +46,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(200);
       res.body.length.should.be.equal(2);
       done();
-      });
+    });
   });
 
   it('should not return vehicle doors status', function(done) {      
@@ -56,7 +56,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(404); 
       res.body.reason.should.be.equal("Vehicle id: 123334 not found.");        
       done();
-      });
+    });
   });
 
   it('should return vehicle fuel as 0', function(done) {      
@@ -66,7 +66,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(200);
       res.body.percent.should.be.equal(0);
       done();
-      });
+    });
   });
 
   it('should return vehicle fuel percent', function(done) {      
@@ -76,7 +76,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(200);
       res.body.should.have.property("percent");
       done();
-      });
+    });
   });
 
   it('should not return vehicle fuel percent', function(done) {      
@@ -86,7 +86,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(404); 
       res.body.reason.should.be.equal("Vehicle id: 123334 not found.");        
       done();
-      });
+    });
   });
 
   it('should return vehicle battery percent', function(done) {      
@@ -96,7 +96,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(200);
       res.body.should.have.property("percent");
       done();
-      });
+    });
   });
 
   it('should not return vehicle battery percent', function(done) {      
@@ -106,7 +106,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(200); 
       res.body.percent.should.be.equal(0);        
       done();
-      });
+    });
   });
 
   it('should return vehicle engine status', function(done) {      
@@ -118,7 +118,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(200);
       res.body.should.have.property("status");
       done();
-      });
+    });
   });
 
   it('should return bad output for wrong action', function(done) {      
@@ -129,7 +129,7 @@ describe('Smartcar API test', function() {
     .end(function(err, res) {
       res.status.should.be.equal(400);
       done();
-      });
+    });
   });    
 });
 
