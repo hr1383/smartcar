@@ -26,10 +26,10 @@ app.use(function(error, req, res, next) {
   if (error.status) {
     res.status(error.status).send(error);     
   } else {
+  	console.log(error);
     res.status(500).send({"status" : "500", "reason": "Internal server error"});
   }
 });
 
 // START THE SERVER
-// =============================================================================
 app.listen(port);

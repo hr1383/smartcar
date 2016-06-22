@@ -1,115 +1,76 @@
 var express = require('express');
 var router = express.Router();
-var request = require('request');
-// vehicle info endpoint
+var VehicleFactory = require("./../common/vehicleFactory.js");
+var vehicleFactory = new VehicleFactory();
+var requestApi = require("./../common/requestApi.js");
+
 router.get('/:id', function(req, res, next) {
-  var input = { id: req.params.id,  responseType: 'JSON' };
-  gm_api(input, 'getVehicleInfoService', function(err, response) {
+  // Create an instance of our factory that makes vehicles
+  var vehicle = vehicleFactory.getVehicle(req.params.id);
+  var input = vehicle.vehicleInfo.parseInput(req.params.id);
+  requestApi(input, vehicle.vehicleInfo.url, function(err, response) {
     if (err) { 
       next(err);
     } else { 
-      var vehicle_info = response.data;
-      res.json({"vin" : vehicle_info.vin.value, "color" : vehicle_info.color.value,
-        "doorCount": vehicle_info.fourDoorSedan.value == 'True' ? 4 : 2, 
-        "driveTrain": vehicle_info.driveTrain.value });   
+      res.json(vehicle.vehicleInfo.parseOutput(response));   
     } 
   });
 });
 
-// vehicle doors status endpoint
+// vehicle doors status url
 router.get('/:id/doors', function(req, res, next) {
-  var input = { id: req.params.id,  responseType: 'JSON' };
-  gm_api(input, 'getSecurityStatusService', function(err, response) {
+  var vehicle = vehicleFactory.getVehicle(req.params.id);
+  var input = vehicle.doorsStatus.parseInput(req.params.id);
+  requestApi(input, vehicle.doorsStatus.url, function(err, response) {
     if (err) { 
       next(err);
     } else { 
-      getVehicleStatusResponse(response.data, function (result) {
-        res.json(result); 
-      });
+        res.json(vehicle.doorsStatus.parseOutput(response)); 
     } 
   }); 
 });
 
-// vehicle fuel status endpoint
+// vehicle fuel status url
 router.get('/:id/fuel', function(req, res, next) {
-  var input = { id: req.params.id,  responseType: 'JSON' };
-  gm_api(input, 'getEnergyService', function(err, response) {
+  var vehicle = vehicleFactory.getVehicle(req.params.id);
+  var input = vehicle.fuelStatus.parseInput(req.params.id);
+  requestApi(input, vehicle.fuelStatus.url, function(err, response) {
     if (err) { 
       next(err);
     } else {
-      var result = response.data;
-      if (result.hasOwnProperty("tankLevel")) {
-        res.json({"percent" : result.tankLevel.value == "null" ? 0 
-          : parseFloat(result.tankLevel.value)});
-      }
-      else {
-        res.json({"percent" : 0});   
-      }
+      res.json(vehicle.fuelStatus.parseOutput(response));      
     } 
   }); 
 });
 
-// vehicle battery status endpoint
-router.get('/:id/battery', function(req, res, next) {
-  var input = { id: req.params.id,  responseType: 'JSON' };
-  gm_api(input, 'getEnergyService', function(err, response) {
+// vehicle battery status url
+router.get('/:id/battery', function(req, res, next) {  
+  var vehicle = vehicleFactory.getVehicle(req.params.id);
+  var input = vehicle.batteryStatus.parseInput(req.params.id);
+  requestApi(input, vehicle.batteryStatus.url, function(err, response) {
     if (err) { 
       next(err);
     } else {
-      var result = response.data;
-      if (result.hasOwnProperty("batteryLevel")) {
-        res.json({"percent" : result.batteryLevel.value == "null" ? 0 
-          : parseFloat(result.batteryLevel.value)});
-      }
-      else {
-        res.json({"percent" : 0});   
-      }
+      res.json(vehicle.batteryStatus.parseOutput(response));      
     }   
   }); 
 });
 
-// vehicle engine status endpoint
+// vehicle engine status url
 router.post('/:id/engine', function(req, res, next) {
-  var req_action = '';
-  if (req.body.action === 'START') {
-    req_action = "START_VEHICLE";
-  } else if (req.body.action === 'STOP') {
-    req_action = "STOP_VEHICLE";
+  var vehicle = vehicleFactory.getVehicle(req.params.id);
+  try{
+    var input = vehicle.engineAction.parseInput(req.params.id, req.body);
+  } catch(e) {
+    next({"status" : 400, "message": e});
   }
-  if(req_action === '') {
-    next({"status" : "400", "reason": "Bad input"});
-  } else {
-    var input = {id: req.params.id,  command : req_action, responseType: 'JSON'};
-    gm_api(input, 'actionEngineService', function(err, result) {
-      if (err) { 
-        res.json({"status" : "error"});
-      } else {
-        res.json({"status" : result.actionResult == 'FAILED' ? "error" : "success"});
-      }   
-    });   
-  }   
+  requestApi(input, vehicle.engineAction.url, function(err, response) {
+    if (err) {
+      res.json({"status" : "500", "message": "Cannot complete request"});
+    } else {
+       res.json(vehicle.engineAction.parseOutput(response));
+    }
+  });       
 });
-
-var getVehicleStatusResponse = function (vehicle_status, callback) {
-  var dict = [];
-  for(var i in vehicle_status.doors.values) {
-    var door_status  = vehicle_status.doors.values[i];
-    dict.push({"location" : door_status.location.value, 
-      "locked" : door_status.locked.value == 'True' ? true : false})
-  } 
-  callback(dict);
-}
-
-var gm_api = function(input, service, cb) { 
-  //TODO: this url can be moved to a config
-  request.post({url:'http://gmapi.azurewebsites.net/'+ service, json: input}, 
-    function optionalCallback(err, httpResponse, body) {
-      if (body.status != 200) {
-        cb(body, null);       
-      } else {
-        cb(null, body);
-      }
-    });
-}
 
 module.exports = router;

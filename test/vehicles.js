@@ -1,13 +1,22 @@
+process.env.NODE_ENV = 'test';
 var chai = require('chai');
 var should = chai.should();
 var assert = require('assert');
 var request = require('supertest');  
 //TODO: this url can be moved to a config
+var expect = chai.expect;
 var url = "http://localhost:8080"   
+//TODO: find way to start and close after test
+var app = require('./../app');
 
-describe('Smartcar API test', function() {
+describe('Smartvehicle API test', function() {
+  // before(function() {
+  //   app.listen(3000);
+  //   console.log("service started")
+  // });
+  
+  it('should return vehicle info', function(done) {
 
-  it('should return vehicle info', function(done) {      
     request(url)
     .get('/vehicles/1234')
     .end(function(err, res) {
@@ -18,7 +27,7 @@ describe('Smartcar API test', function() {
       res.body.driveTrain.should.be.equal("v8");
       done();
     });
-  });
+  })
 
   it('should not return vehicle info', function(done) {      
     request(url)
@@ -65,6 +74,7 @@ describe('Smartcar API test', function() {
     .end(function(err, res) {
       res.status.should.be.equal(200);
       res.body.percent.should.be.equal(0);
+      expect(res.body.percent).to.be.within(0.0,100.0);
       done();
     });
   });
@@ -74,7 +84,9 @@ describe('Smartcar API test', function() {
     .get('/vehicles/1234/fuel')
     .end(function(err, res) {
       res.status.should.be.equal(200);
+      //using expect since the value is keep changing
       res.body.should.have.property("percent");
+      expect(res.body.percent).to.be.within(0.0,100.0);
       done();
     });
   });
@@ -95,6 +107,7 @@ describe('Smartcar API test', function() {
     .end(function(err, res) {
       res.status.should.be.equal(200);
       res.body.should.have.property("percent");
+      expect(res.body.percent).to.be.within(0.0,100.0);
       done();
     });
   });
@@ -104,7 +117,8 @@ describe('Smartcar API test', function() {
     .get('/vehicles/1234/battery')
     .end(function(err, res) {
       res.status.should.be.equal(200); 
-      res.body.percent.should.be.equal(0);        
+      res.body.percent.should.be.equal(0); 
+      expect(res.body.percent).to.be.within(0.0,100.0);       
       done();
     });
   });
@@ -117,6 +131,8 @@ describe('Smartcar API test', function() {
     .end(function(err, res) {
       res.status.should.be.equal(200);
       res.body.should.have.property("status");
+      expect(res.body.status).to.be.a('string');
+      // expect(res.body.status).to.be.within('success', 'error');
       done();
     });
   });
@@ -130,6 +146,7 @@ describe('Smartcar API test', function() {
       res.status.should.be.equal(400);
       done();
     });
-  });    
+  });
+  
 });
 
